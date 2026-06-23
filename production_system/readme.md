@@ -1,67 +1,126 @@
-# different distribution of kubernetes
+# Kubernetes Distributions and KOPS
 
-1. EKS
-2. OpenShift
-3. Tanzu
-4. Rancher 
+## Kubernetes Distributions
 
-these distribution provides user eperiannace and customer support
+A Kubernetes distribution packages the core Kubernetes engine with extra tooling,
+a user interface, and commercial support on top.
 
+| Distribution | Maintained by |
+|---|---|
+| OpenShift | Red Hat |
+| Rancher | SUSE |
+| Tanzu | VMware |
+| EKS | Amazon Web Services |
 
-however in staging env pre prod env and production many org uses kubernetes
+These distributions add a better user experience and dedicated customer support.
+However, many organisations use plain (upstream) Kubernetes in staging, pre-production,
+and production environments.
 
-ranking of usage of distribution
+### Usage ranking
 
-1. openshift
-2. rancher 
-3. tanzu  by vmware
-4. eks amazon
+1. OpenShift
+2. Rancher
+3. Tanzu (VMware)
+4. EKS (Amazon)
 
+---
 
-Kuernetes vs EKS
+## Kubernetes vs EKS
 
-nothing but eks is built on top of kuernets 
-incase of any issue with eks amazon will provide quick support
+EKS (Elastic Kubernetes Service) is built on top of Kubernetes — it is not a
+replacement. The difference is support: when something breaks on EKS, Amazon
+provides quick assistance. With plain Kubernetes you rely on the community.
 
-# KOPS
+---
 
-kops is an open soruce command line tool
+## KOPS
 
-it manages the life cycle of k8s create,upgrade ,manage,delete
+KOPS (Kubernetes Operations) is an open-source command-line tool that manages
+the full lifecycle of a Kubernetes cluster:
 
+```
+┌──────────┐     ┌──────────┐     ┌──────────┐     ┌──────────┐
+│  Create  │ ──► │ Upgrade  │ ──► │  Manage  │ ──► │  Delete  │
+└──────────┘     └──────────┘     └──────────┘     └──────────┘
+```
 
-# steps to implement kops
+---
 
-dev dependencies
+## Steps to Set Up KOPS on AWS
 
-python3 
-aws cli
-kubectl 
+### 1. Install dependencies
 
-Install KOPS
+- Python 3
+- AWS CLI
+- `kubectl`
+- KOPS binary
 
+### 2. Grant IAM permissions
 
-GRant permission if using iam user on aws
+If using an IAM user, attach the following policies:
 
-EC2 Full access
-s3 full acces
-vpc full access
-iam full access
+- EC2 full access
+- S3 full access
+- VPC full access
+- IAM full access
 
+### 3. Configure AWS CLI
+
+```bash
 aws configure
+```
 
+### 4. Create an S3 bucket
 
-create s3 bukcet to store all config of cluster
+KOPS uses an S3 bucket to store all cluster configuration and state.
 
-cmd -> kops create cluster --name s3_bukcet info region_info volume_info 
+```bash
+aws s3 mb s3://your-bucket-name --region your-region
+export KOPS_STATE_STORE=s3://your-bucket-name
+```
 
+### 5. Create the cluster
 
+```bash
+kops create cluster \
+  --name your-cluster.k8s.local \
+  --state s3://your-bucket-name \
+  --zones your-availability-zone \
+  --node-count 2 \
+  --node-size t3.medium \
+  --master-size t3.medium
+```
 
-kops update cluster --name.local
+### 6. Apply the cluster
 
+```bash
+kops update cluster --name your-cluster.k8s.local --yes
+```
 
-# for production
+---
 
-instead of local use domain
+## For Production
 
-and configure route 53 aws
+In a production setup, replace `.k8s.local` (local DNS) with a **real domain**.
+Use **AWS Route 53** to manage DNS for the cluster.
+
+### Steps
+
+1. Register or delegate a domain in Route 53.
+2. Create a hosted zone for your cluster subdomain (e.g. `k8s.yourdomain.com`).
+3. Use that domain as the cluster name in the `kops create cluster` command:
+
+```bash
+kops create cluster \
+  --name k8s.yourdomain.com \
+  --state s3://your-bucket-name \
+  --zones your-availability-zone \
+  --dns-zone k8s.yourdomain.com
+```
+
+Route 53 will handle DNS resolution so nodes and the API server can find each other
+by name across the cluster.
+
+---
+
+*KOPS docs: https://kops.sigs.k8s.io*
