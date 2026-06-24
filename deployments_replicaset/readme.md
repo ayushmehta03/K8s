@@ -1,4 +1,3 @@
-# 🚀 Kubernetes Deployment Guide
 
 ## Deployment Wrapper in Kubernetes
 
