@@ -1,44 +1,81 @@
-# K8s Pods
+# Kubernetes Pods
 
-Pod is the smallest deployale unit in k8s
+## What is a Pod?
 
+A **Pod** is the smallest deployable unit in Kubernetes. It is defined in a `pod.yml` file, which describes how to run one or more containers.
 
-executed inside pod.yml file -> it is basically the deination of how to run a container
+![Pod Architecture](pod_architecture.png)
 
+### Key concepts
 
-pod can run either a single or multiple contaienrs
-side car or init containers which supports the actual container
+- A pod can run a **single container** or **multiple containers**.
+- When multiple containers run in a pod, they share:
+  - **Network** — same IP address and port space
+  - **Storage** — shared volumes mounted across containers
+- **Sidecar containers** run alongside the main container to support it (e.g. log shippers, proxies).
+- **Init containers** run and complete *before* the main container starts (e.g. for setup tasks).
 
+> To get auto-scaling and auto-healing, pods are managed by a **Deployment** (a wrapper around pods).
 
-if a pod runs multiple container they get advantage of shared network and shared storage 
+---
 
+## Setup
 
+1. Install `kubectl` — the CLI tool for Kubernetes.
+2. Install `minikube` — runs a local single-node cluster (1 master + 1 worker) for learning.
 
-# steps to create delete get info about pods using minkube
+---
 
-1. install kubectl -> cli tool for kubernetes
+## Commands
 
-2. install minikube -> used locally provides 1 master and 1 worker node for learning purpose
+### Start the cluster
 
-# cmd to execute
+```bash
+minikube start
+```
+Creates a VM with a single-node Kubernetes cluster. Uses the Docker driver by default.
 
-1. minikube start (creates a vm for single node k8s cluster) by default it uses docker driver
+```bash
+kubectl get nodes
+```
+Shows info about the nodes in the cluster.
 
-2. kubectl get nodes (give the info about the node cluster)
+---
 
-3. create a pod.yml file 
+### Create a Pod
 
-4. kubectl create -f pod.yml (creates pod)
+```bash
+kubectl create -f pod.yml
+```
+Creates a pod from your `pod.yml` definition file.
 
-5. kubectl get pods (give the pod information ) || kubectl get pods -o wide (details info)
+---
 
-6. kubectl delete pod pod_name (deletes the running pod)
+### Get Pod info
 
-7. kubectl describe pod pod_name (give status of everything inside a pod, helps in debuging)
+```bash
+kubectl get pods
+kubectl get pods -o wide    # more detailed output
+```
 
-8. kubectl logs pod_name (gives log of the application)
+---
 
+### Debug a Pod
 
-# add:
+```bash
+kubectl describe pod <pod-name>
+```
+Shows the full status of everything inside the pod. Useful for debugging.
 
-to acheive auto scaling auto healing we use wrapper deployment 
+```bash
+kubectl logs <pod-name>
+```
+Prints the application logs from the pod.
+
+---
+
+### Delete a Pod
+
+```bash
+kubectl delete pod <pod-name>
+```
