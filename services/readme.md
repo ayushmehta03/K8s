@@ -1,93 +1,62 @@
-# k8s services
+# K8s Services
 
+> Services work on top of deployment to solve the gaps that deployment alone cannot handle.
 
-services are the add on feature given by k8s that works on the top of deployment
+---
 
-we were solving our issues with deployment earlier then why do we need services ??
+## Problems & Solutions
 
+### 🔴 Problem 1 — Pods get new IPs on heal
 
-# problem 1
+When auto-healing creates a new pod, it gets a fresh IP address. With hundreds of pods running, teams have no way to know — and keep hitting the old, terminated address. This increases debugging time and is inefficient.
 
-while deployment provides auto healing feature by creating new pod before the termination of other pod
+#### ✅ Solution — Load Balancing
 
-the problem arises when new pod is created it gets new ip address
+Instead of directly accessing pods with an IP address, we implement a load balancer in the service. It distributes traffic automatically — no IP address required. However, this alone is not a complete solution.
 
-but the user or team working doesnt get informed about chnage as there are 100s of pods running
+---
 
-they try to access the previous or terminated pod ip addresss which returns error 
+### 🔴 Problem 2 — Load balancer still knows only old IPs
 
-this increase the debuuging time and is inefficinet
+Even with a load balancer, it learned the old IP. After healing, the new pod has a fresh IP — the balancer can still route to the dead address, causing inconvenience to users and teams.
 
-# solution
+#### ✅ Solution — Labels & Selectors
 
-load balancing : insteaed of directly accessing the pods or app with ip add 
+Services don't track IPs at all. Pods carry **labels** defined in the deployment metadata. In case any pod is healed, the newly created one inherits the same label automatically.
 
-we implement a load balancer in the services which eventually distributes the traffic
+**Basic structure:**
 
-no requirnemnt of ip add it will redirect to the required app with the lb algo mechanims
+```
+Deployment → ReplicaSet → Pod 1 (app: my-app)
+                        → Pod 2 (app: my-app)
+                        → Healed Pod (app: my-app)  ← same label, no config change
+```
 
-however this is not a complete soln
+Load balancing uses the label for traffic distribution — not the IP address.
 
-# problem 2
+---
 
-however we implemented load balancing but the prolem is still there how it will know the new ip address created by healing process
-it will still redirect to previous ip add based on the algo
+### 🔴 Problem 3 — App is unreachable outside the cluster
 
-this will cause inconveniance to users and the teams
+The app works inside K8s, but you can't share cluster credentials with end users or other teams just to let them access it. This is a major issue in production.
 
+#### ✅ Solution — Service Discovery (3 modes)
 
-# solution 2
+Services provide a **service discovery** feature with 3 access modes:
 
-services uses something as label and selectors 
+| Mode | Access Level | Use Case |
+|---|---|---|
+| **Cluster IP** | Internal only | DevOps & internal teams with cluster access |
+| **Node Port** | VPC / node level | Teams working on nodes or with VPC access |
+| **Load Balancer** | Public internet | External world access |
 
-instead of depending upon ip add it gives label to pod 
+**How Load Balancer works on AWS:**
 
-in deployment we define label in the metadata
+On AWS, the Load Balancer mode instructs EKS to provision an Elastic Load Balancer with a public IP address. That public IP becomes the entry point for the external world.
 
- in case any pod is healed again created one will also have the same label defined in deployment
+---
 
+## Diagram
 
- # basics structure
-
- deployment -> creates replicasets  -> pod1 and pod2 both having same  label 
- yaml here we define 
- label
-
- load balancing will use label for distribution
-
-
- # problem 3
-
- however we are done with the two problems but there is still one that is we are only able to access the app from kubernetes cluster
-
- this is a major issue in production we cant give users k8s cluster creditians and tell them to login to use app
-
-
-and even the other team members will not be able to use it
-
-# solution 3
-
-services provided us discovery feature
-
-it porvides us 3 functionality:
-1. cluster ip
-2. node port
-3. load balance 
-
-
-cluster ip -> used when we want to give the acces only to the internal and devops team who have kuberntes cluster access
-
-node prot -> give access to those who are working on any node or having vpc accesss
-
-load balancer-> give access to the external world
-
-# how load balancer works work discovery
-
-suppose we are using aws  will tell eks to give elastic load balancer a public ip add
-
-that public ip add will be used for the external world access
-
-
-
-
+![K8s Services Diagram](./k8s_services_architecture.png)
 
