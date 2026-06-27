@@ -1,44 +1,55 @@
-# rbac
+# Kubernetes RBAC
 
-plays major role in security
+RBAC stands for **Role Based Access Control**. It plays a major role in security — each user has a role defined, and their actions are limited based on that role.
 
-rbac stands for role based acccess control
+![RBAC Architecture](rbac_diagram.png)
 
-user has their role defiend and they have limitation on actins based on the role
+---
 
+## Types
 
-# types
+1. Service Account
+2. Role / ClusterRole
+3. RoleBinding / ClusterRoleBinding
 
-1. service accoount
-2. roles/cluster role
-3. rolebinding/ cluster role binding
+---
 
-# k8s scenirio
+## K8s scenario
 
-k8s doesnt have feature of user management or role management they throw this responsibility on identify providers
+Kubernetes does not have its own user management or role management. It delegates this responsibility to **identity providers**.
 
-for eg: for aws eks identifier can be iamuser
+For example, on AWS EKS the identity provider can be an IAM user.
 
-# keyclok
+---
 
-common tool used for rbac can be connected to github also for better feature ussage
+## Keycloak
 
+Keycloak is a common tool used for RBAC. It can also be connected to GitHub for better feature usage.
 
-# service account
+---
 
-one can create service account for their pods 
+## Service Account
 
-however a default one is always created wrt pods
+- One can create a service account for their pods.
+- However, a **default service account is always created** for every pod automatically.
 
+---
 
-# role binding
+## How RoleBinding works
 
-contains 3 components
-1. service accounts -> these are the users
-2. role -> specify the permission
-3. role binding -> bind the permission to the user on the basis of role
+RoleBinding has 3 components:
 
-# cp
+| Component | Purpose |
+|---|---|
+| Service Account | The subject (the user or pod) |
+| Role | Specifies the permissions |
+| RoleBinding | Binds the permissions to the subject based on the role |
 
- for namespace-> role binding
- for cluster -> cluster role binding
+---
+
+## Scope
+
+| Scope | Resources used |
+|---|---|
+| Namespace level | Role + RoleBinding |
+| Cluster level | ClusterRole + ClusterRoleBinding |
