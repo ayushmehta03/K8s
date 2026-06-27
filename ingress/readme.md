@@ -1,24 +1,38 @@
-# ingress in k82
+# Kubernetes Ingress
 
-ingress is a feature provided by k8s which allow to implement diff load balancing algorithms and api gateway
+Ingress is a feature provided by Kubernetes that allows you to implement different load balancing algorithms and acts as an API gateway.
 
+![Ingress Flow](ingress_flow.png)
 
-# problems before ingress
+---
 
-1. while using services there was only one load baalncing algorihtm round robin it lacks security and demand
-2. for exposing to the real world in services load balancer used is guven static public ip add cloud provider charges for each ip add
+## Problems before Ingress
 
+1. **Limited load balancing** — Services only support round-robin. It lacks the security and flexibility demanded at enterprise level.
+2. **Cost of public IPs** — To expose an app to the real world, Services use a LoadBalancer type which gets a static public IP. Cloud providers charge for each IP address, which becomes expensive as services scale.
 
-# enterprise level load balancer demans
-1. sticky lb
-2. tcl 
-3. path based
-4. host based
-5. ratio based
+---
 
+## Enterprise-level load balancer demands
 
-# flow
+| Algorithm | Description |
+|---|---|
+| Sticky | Routes a user to the same pod every time (session affinity) |
+| TLS | Terminates HTTPS at the edge — handles certificates centrally |
+| Path-based | Routes `/api`, `/app`, `/admin` to different services |
+| Host-based | Routes `api.example.com` and `app.example.com` separately |
+| Ratio-based | Splits traffic by weight — useful for canary deployments |
 
-user deploys ingress.yaml file and installs ingress controller whatever they want nginx through one ingress they can manage 100 services 
+---
 
+## How Ingress works
 
+1. You deploy an **Ingress Controller** (e.g. nginx, Traefik) into your cluster — this is the actual component doing the routing.
+2. You write an **`ingress.yaml`** file that defines the routing rules — which path or host goes to which Service.
+3. Through **one Ingress**, you can manage 100s of Services — all behind a single public IP.
+
+```
+User → Ingress Controller (ingress.yaml rules) → Service A / B / C → Pods
+```
+
+This solves both problems: you get advanced routing algorithms, and you only pay for one IP address.
