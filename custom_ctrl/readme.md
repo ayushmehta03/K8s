@@ -1,34 +1,77 @@
-# k8s custom controllers
+# Kubernetes Custom Controllers
 
-used to add new resources to the kuberntes cluster
+Kubernetes ships with built-in resources — `Deployment`, `Service`, `ConfigMap`, `Secret`, and so on. Custom controllers let you **add your own resource types** to the cluster when the built-ins are not enough.
 
-for example by default we have service deployment configmap scretes etc
+---
 
-but some extension is required then custom controller is used
+## Components
 
-# components
+### CRD — Custom Resource Definition
+The **blueprint**. It tells Kubernetes what your new resource looks like — which fields are allowed, their types, and which are required. You register a CRD once and it becomes available cluster-wide.  
+Think of it as a *class definition* in object-oriented programming.
 
-Crd -> custom resource defination
-Cr-> custom resource
-Custom controller
+### CR — Custom Resource
+An **instance** of a CRD. The user writes a YAML file for it, just like they would for a Deployment. Kubernetes stores it in `etcd` and validates it against the CRD schema before accepting it.
 
+### Custom Controller
+The **brain**. It watches for CR events via the API server and runs a **reconciliation loop**:
 
-# work flow
+```
+observe actual state  →  compare with desired state  →  take action to close the gap
+```
 
-1. lets breakdown the wf of deployment which is a deafut controller
+---
 
-user wrtites custom deploymet file kuberntes has something as tempelate which is resoruce defination and if user enters some field which are not define dit will thorw error and if verified the controller comes in action starts creating replicasets pods etc... basically performs action
+## Workflow
 
+### 1. How a default controller works (Deployment example)
 
-2. now for custom controllers
+```
+User YAML  →  Resource Definition (template)
+                      │
+               validates fields
+                      │  match
+                      ↓
+             Default Controller  →  creates ReplicaSets & Pods
+```
 
-first the resource will be deployed it will have a custom resrouce defination which will match and validate then the custom controller will perform actions 
+1. User writes a Deployment YAML.
+2. Kubernetes checks it against the built-in resource definition (the template).
+3. If a field is invalid or missing — error is thrown.
+4. If valid — the Deployment controller kicks in and creates ReplicaSets and Pods.
 
+### 2. How a custom controller works
 
+```
+User YAML  →  Custom Resource (CR)
+                      │
+               CRD validates
+                      │  match
+                      ↓
+             Custom Controller  →  executes your logic
+```
 
-# baisc architecture
+1. You first deploy a **CRD** — the schema for your new resource.
+2. User writes a CR YAML (an instance of that CRD).
+3. Kubernetes validates the CR against the CRD schema.
+4. Your **Custom Controller** detects the new CR and performs whatever action you programmed.
 
-cUSTOM rESOURCE-> K8sCluster <--- Custom Controller
-|||||
-Custom resoruce defination
+---
 
+## Architecture
+
+```
+Custom Resource  →  K8s API Server  ←→  Custom Controller
+                           ↑
+                    CRD (validates schema)
+```
+
+![Architecture Diagram](k8s_custom_controllers.png)
+
+---
+
+## Key Idea
+
+> The CRD defines **what** the resource looks like.  
+> The CR is **one instance** of that resource.  
+> The Custom Controller decides **what to do** when that resource appears.
