@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: admin-db            
+  labels:
+    app: admin-db
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: admin-db
+  template:
+    metadata:
+      labels:
+        app: admin-db
+    spec:
+      containers:
+      - name: admin-client
+        image: admin-db:latest 
+        env:
+          - name: DB-PORT
+            valueFrom:
+              configMapKeyRef:
+                name: test-cm
+                key: db-port
+        imagePullPolicy: IfNotPresent  
+        ports:
+        - containerPort: 5173
