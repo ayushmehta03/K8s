@@ -1,6 +1,0 @@
-env:
-          - name: DB-PORT
-            valueFrom:
-              configMapKeyRef:
-                name: test-cm
-                key: db-port
