@@ -17,12 +17,14 @@ spec:
       containers:
       - name: admin-client
         image: admin-db:latest 
-        env:
-          - name: DB-PORT
-            valueFrom:
-              configMapKeyRef:
-                name: test-cm
-                key: db-port
+        volumeMounts:
+        - name: db-connection
+          mountPath: /opt
         imagePullPolicy: IfNotPresent  
         ports:
         - containerPort: 5173
+
+      volumes:
+        - name: db-connection
+          configMap: 
+            name: test-cm
