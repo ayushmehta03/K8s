@@ -5,8 +5,7 @@
 ![Architecture](monitoring_arch.png)
 
 ---
-[!Prometheus_Architecture](prometheus-architecture.gif)
- 
+![Prometheus Architecture](prometheus-architecture.gif)
 ---
 
 ## Install Prometheus
