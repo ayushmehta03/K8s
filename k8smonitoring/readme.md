@@ -32,6 +32,11 @@ kubectl expose service prometheus-server  --type=NodePort   --target-port=9090  
 
 minikube service prometheus-server-ext
 
+# this will launch prometheus dashboard
+
+![Prometheus Dashboard](prometheus_dashboard.png)
+
+
 
 
 # install grafana
@@ -55,16 +60,35 @@ minikue service grafana-ext
 
 # this will launch grafana dashboard
 
-![Grafana dASHBOARD](grafana_dashboard.png)
+![Grafana Dashboard](grafana_dashboard.png)
+
+
+# auth for grafana dashboard 
+
+username=admin
+ to fetch password run:
+   kubectl get secret --namespace default  my-grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
 
 
 
 
+# grafana dashoard setup
+
+1. create data source
+2. select prometheus
+2. add prometheus url http://prometheus-server-ext:80 
+3. go to dashboard 
+4. add import dashoard
+5. use id 3662
+6. select source as prometheus
+
+
+# only for docker driver and mac users
 
 
 ┌───────────────────────────────── Mac Engine ─────────────────────────────────┐
  │                                                                              │
- │  Your Mac Browser ──(Blocked Natively)───┐                                   │
+ │   Mac Browser ──(Blocked Natively)───┐                                   │
  │       │                                  │                                   │
  │       │ (minikube service tunnel)        ▼                                   │
  │       ▼                            ┌─────────── Minikube (Docker Container) ┐│
@@ -75,3 +99,13 @@ minikue service grafana-ext
  │                                    │        URL: http://prometheus:80       ││
  │                                    └────────────────────────────────────────┘│
  └──────────────────────────────────────────────────────────────────────────────┘
+
+
+
+# visuals of grafana dashboard
+
+![ Dashboard 1](dashboard1.png)
+![ Dashboard 2](dashboard2.png)
+![ Dashboard 3](dashboard3.png)
+
+
